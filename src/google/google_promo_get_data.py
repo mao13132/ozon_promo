@@ -112,7 +112,11 @@ class GooglePromoGetData:
 
             dict_range_date = google_alternate.calculation_range_date(range_date_list)
 
-            res_calculation_date = google_alternate.calculation_last_date(dict_range_date, name_sheet)
+            good_range_date = google_alternate.calculation_last_date(dict_range_date, name_sheet)
+
+            res_group = google_alternate.clear_hide_group(good_range_date, name_sheet)
+
+
 
             print()
 
