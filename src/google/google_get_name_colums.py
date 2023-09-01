@@ -13,7 +13,7 @@ class GoogleGetNameColums:
 
             self.values = self.service.spreadsheets().values().get(
                 spreadsheetId=ID_SHEET,
-                range=f'{name_sheet}!A1:ZZ1',
+                range=f'{name_sheet}!A2:ZZ2',
                 majorDimension='ROWS'
             ).execute()
 

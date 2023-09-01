@@ -18,7 +18,7 @@ class ConnectGoogleAlternative:
 
         self.micro_sleep = 1
 
-        self.count_group = 6
+        self.count_group = 7
 
         json_keyfile = r'src/google_api_file/ozonproject-1.json'
 
@@ -179,13 +179,10 @@ class ConnectGoogleAlternative:
             time.sleep(self.micro_sleep)
 
             _dict_start_index[f'range{_count}'] = start_index_date
-
             _dict_start_index[f"column{_count}_start"] = range_columns[f"column{_count}_start"]
-
             _dict_start_index[f"column{_count}_start_col"] = range_columns[f"column{_count}_start_col"]
 
             _dict_start_index[f"column{_count}_end"] = range_columns[f"column{_count}_end"]
-
             _dict_start_index[f"column{_count}_end_col"] = range_columns[f"column{_count}_end_col"]
 
             good_list.append(_dict_start_index)
@@ -207,7 +204,10 @@ class ConnectGoogleAlternative:
             if left_count > self.count_group:
                 difference = left_count - self.count_group
 
-                seven_target = 30 - difference - self.count_group
+                seven_target = right_count - difference
+
+                if seven_target < 7:
+                    difference = left_count + right_count - self.count_group
 
                 columns_difference = _range[f"range{_count}"]['range'][difference].col
 
@@ -217,25 +217,13 @@ class ConnectGoogleAlternative:
 
                 worksheet._hide_dimension(_range[f'column{_count}_start_col'] - 1, columns_difference, 'COLUMNS')
 
-                if seven_target > 1:
-                    """Если остаются с права колонки то их группируем"""
-                    
-                    time.sleep(self.micro_sleep)
-
-                    start_point = _range[f'column{_count}_end_col'] - seven_target
-
-                    end_point = _range[f'column{_count}_end_col'] - 1
-
-                    worksheet.add_dimension_group_columns(start_point, end_point)
-
-                    time.sleep(self.micro_sleep)
-
-                    worksheet._hide_dimension(start_point, end_point, 'COLUMNS')
-
-            if right_count > 1 and seven_target == 0:
-                start_point = _range[f'column{_count}_start_col'] + (self.count_group - 1)
+            if right_count > 1:
+                start_point = _range[f"range{_count}"]['job_index_col'] - 1
 
                 end_point = _range[f'column{_count}_end_col'] - 1
+
+                if seven_target == 0:
+                    start_point = _range[f"range{_count}"]['job_index_col'] + 5
 
                 worksheet.add_dimension_group_columns(start_point, end_point)
 

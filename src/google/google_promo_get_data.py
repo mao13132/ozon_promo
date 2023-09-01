@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 from settings import NAME_SHEET, ID_SHEET
 from src.google._google_get_sheets_name import GoogleGetSheetsName
@@ -11,7 +12,7 @@ class GooglePromoGetData:
         self.google_core = google_core
         self.count_load_rows = 100000
 
-    def _get_article(self, x, y, name_sheet):
+    def _get_data_job(self, x, y, name_sheet):
         values = self.google_core.service.spreadsheets().values().get(
             spreadsheetId=ID_SHEET,
             range=f'{name_sheet}!{x}:{y}',
@@ -24,70 +25,27 @@ class GooglePromoGetData:
 
         return values
 
-    def get_article(self, article, name_sheet):
-
-        x = f"{colums_slovar[article]}2"
-
-        y = f"{colums_slovar[article]}{self.count_load_rows}"
-
-        article_list = self._get_article(x, y, name_sheet)
-
-        return article_list
-
     @staticmethod
-    def get_index_reviews(list_name_columns):
+    def search_index_columns(list_name_columns):
         ip_list_index = []
         article = 0
-        for count, colm in enumerate(list_name_columns['values'][0]):
 
-            _temp_ip = {}
+        _temp_ip = {}
 
-            if 'Артикул' in colm:
-                article = count
+        for count, colm in enumerate(list_name_columns):
 
-            if 'Отзывы' in colm:
-                _temp_ip['name'] = colm
-                _temp_ip['index'] = count
-                _temp_ip['article_inx'] = article
+            if 'запрос' in colm.value.lower():
+                _temp_ip['request_inx'] = colm.address
+
+            if 'артикул' in colm.value.lower():
+                _temp_ip['article_inx'] = colm.address
+
+            if 'id' in colm.value.lower():
+                _temp_ip['id'] = colm.address
 
                 ip_list_index.append(_temp_ip)
 
         return ip_list_index
-
-    def start_format_data(self, name_sheet, name_index_list, article_list):
-
-        good_dict_data = []
-
-        for count, article_ in enumerate(article_list):
-
-            if article_ == []:
-                continue
-
-            count = count + 2
-
-            x = f"{colums_slovar[name_index_list[0]['index']]}{count}"
-
-            product = {}
-
-            try:
-                product['competitor'] = 'Отзывы'
-            except:
-                continue
-
-            product['request'] = ''
-
-            product['name_sheet'] = name_sheet
-            product['x'] = x
-            product['y'] = x
-            product['price_index'] = ''
-            try:
-                product['article'] = article_[0]
-            except:
-                continue
-
-            good_dict_data.append(product)
-
-        return good_dict_data
 
     def reviews_get_data(self):
 
@@ -96,15 +54,25 @@ class GooglePromoGetData:
         else:
             names_list_sheet = NAME_SHEET
 
-        good_all_job = []
+        _temp = {}
 
         google_alternate = ConnectGoogleAlternative()
 
         for name_sheet in names_list_sheet:
+            _temp[name_sheet] = {}
 
-            # TODO работа по получению индексов столбцов дат
+            # TODO работа по получению индексов столбцов дат===============================
 
-            range_date_list = google_alternate.get_range_date_columns(name_sheet)
+            print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} '
+                  f'Высчитываю данные для группировки колонок на {name_sheet}')
+
+            try:
+                range_date_list = google_alternate.get_range_date_columns(name_sheet, 'AZ1:ZZ1')
+            except:
+                print(f'Ошибка при получение данных с вкладки {name_sheet}')
+                continue
+
+            time.sleep(1)
 
             if range_date_list == []:
                 print(f'Не найдены данные на {name_sheet}')
@@ -112,35 +80,42 @@ class GooglePromoGetData:
 
             dict_range_date = google_alternate.calculation_range_date(range_date_list)
 
+            time.sleep(1)
+
             good_range_date = google_alternate.calculation_last_date(dict_range_date, name_sheet)
 
-            res_group = google_alternate.clear_hide_group(good_range_date, name_sheet)
+            time.sleep(1)
 
+            _temp[name_sheet]['good_range_date'] = good_range_date
 
+            res_group = google_alternate.clear_hide_group_and_create_new_group(good_range_date, name_sheet)
 
-            print()
+            # TODO работа по получению индексов столбцов дат===============================
 
-            # print(f'Получаю данные для построения отчёта эффективности с вкладки {name_sheet}')
-            #
-            # name_columns = GoogleGetNameColums(self.google_core).get_name_columns(name_sheet)
-            #
-            # if not name_columns:
-            #     continue
-            #
-            # name_index_list = self.get_index_reviews(name_columns)
-            #
-            # if name_index_list == []:
-            #     print(f'На вкладке {name_sheet} не обнаружены столбцы с данными')
-            #     continue
-            #
-            # article = name_index_list[0]['article_inx']
-            #
-            # article_list = self.get_article(article, name_sheet)
-            #
-            # dict_job_one_sheet = self.start_format_data(name_sheet, name_index_list, article_list)
-            #
-            # good_all_job.extend(dict_job_one_sheet)
-            #
-            # time.sleep(5)
+            print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} '
+                  f'Получаю данные для построения отчёта эффективности с вкладки {name_sheet}')
 
-        return good_all_job
+            range_date_list = google_alternate.get_range_date_columns(name_sheet, 'A2:BP2')
+
+            time.sleep(1)
+
+            if range_date_list == []:
+                continue
+
+            name_index_list = self.search_index_columns(range_date_list)
+
+            if name_index_list == []:
+                print(f'На вкладке {name_sheet} не обнаружены столбцы с данными')
+                continue
+
+            start_data_columns = f"{name_index_list[0]['request_inx'][:-1]}3"
+
+            over_data_columns = f"{name_index_list[0]['id'][:-1]}{self.count_load_rows}"
+
+            list_data_job = self._get_data_job(start_data_columns, over_data_columns, name_sheet)
+
+            _temp[name_sheet]['list_data_job'] = list_data_job
+
+            time.sleep(5)
+
+        return _temp

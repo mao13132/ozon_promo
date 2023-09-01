@@ -1,6 +1,6 @@
 NAME_API_FILE = 'ozonproject-1.json'  # Наименования файла-ключа от API google. Файл поместить в папку google_api_file
 
-ID_SHEET = '1xxuT7J0TxDopWnL9WZw2f_p-gsLe6N3D4nCPdBY0I4M'
+ID_SHEET = '1IDLaPlkoMwpnfA0hhcJLFNpmPwkx7xzxI0iV7nsIFlA'
 
 BLACK_NAME = []
 
