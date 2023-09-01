@@ -67,11 +67,11 @@ class JobRequestsSearch:
             request = request
 
         count = 0
-        count_try = 5
+        count_try = 2
         while True:
             count += 1
             if count > count_try:
-                print(f'Не смог вставить поисковый запрос {request}')
+                print(f'Не обнаружен запрос "{request}"')
                 return False
 
             _request = self.get_value_search(row)

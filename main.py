@@ -25,6 +25,17 @@ def main():
 
     try:
         browser = CreatBrowser(dir_project)
+
+
+        if PROMO_JOB:
+            data_pars_dict = GooglePromoGetData(google_alternate).reviews_get_data()
+
+            print(f'\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Обработал все вкладки. Начинаю работу с Ozon\n')
+
+            res_job = JobPromo(browser.driver, data_pars_dict, google_alternate, dir_project).start_promo()
+
+        print(f'\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Закончил работу\n')
+
     except Exception as es:
         msg = f'{NAME_SERVER} Ошибка при создание браузера ошибка: "{es}"'
 
@@ -32,16 +43,9 @@ def main():
 
         SendlerOneCreate('').save_text(msg)
 
-        return False
-
-    if PROMO_JOB:
-        data_pars_dict = GooglePromoGetData(google_alternate).reviews_get_data()
-
-        print(f'\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Обработал все вкладки. Начинаю работу с Ozon\n')
-
-        res_job = JobPromo(browser.driver, data_pars_dict, google_alternate, dir_project).start_promo()
-
-    print(f'\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Закончил работу\n')
+    finally:
+        browser.driver.close()
+        browser.driver.quit()
 
 
 if __name__ == '__main__':

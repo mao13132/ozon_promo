@@ -34,10 +34,11 @@ class GooglePromoGetData:
 
     def reviews_get_data(self):
 
+        # now_day = 8
         now_day = datetime.now().day
 
-        now_month = 10
-        # now_month = datetime.now().month
+        # now_month = 10
+        now_month = datetime.now().month
 
         now_yer = datetime.now().year
 

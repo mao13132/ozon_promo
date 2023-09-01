@@ -25,7 +25,7 @@ class ConnectGoogleAlternative:
 
         self.micro_sleep = 1
 
-        self.count_group = 6
+        self.count_group = 7
 
         json_keyfile = r'src/google_api_file/ozonproject-1.json'
 
@@ -194,7 +194,8 @@ class ConnectGoogleAlternative:
 
             if now_month == month_cell:
 
-                if now_day >= day_cell:
+                if now_day > day_cell:
+                    # if now_day >= day_cell:
                     list_now_mouth_day.append(count)
 
         return list_now_mouth_day
@@ -274,19 +275,21 @@ class ConnectGoogleAlternative:
 
             right_count = _range[f"range{_count}"]['right_count']
 
-            if left_count > self.count_group:
+            if left_count >= self.count_group:
 
                 difference = left_count - self.count_group
 
-                seven_target = 30 - difference - self.count_group
+                start_group = _range[f'column{_count}_start_col'] - 1
 
                 columns_difference = _range[f"range{_count}"]['range'][difference].col
 
-                worksheet.add_dimension_group_columns(_range[f'column{_count}_start_col'] - 1, columns_difference)
+                seven_target = 30 - difference - self.count_group
+
+                worksheet.add_dimension_group_columns(start_group, columns_difference)
 
                 time.sleep(self.micro_sleep)
 
-                worksheet._hide_dimension(_range[f'column{_count}_start_col'] - 1, columns_difference, 'COLUMNS')
+                worksheet._hide_dimension(start_group, columns_difference, 'COLUMNS')
 
                 if seven_target > 1:
                     """Если остаются с права колонки то их группируем"""
@@ -304,7 +307,11 @@ class ConnectGoogleAlternative:
                     worksheet._hide_dimension(start_point, end_point, 'COLUMNS')
 
             if right_count > 1 and seven_target == 0:
-                start_point = _range[f'column{_count}_start_col'] + (self.count_group - 1)
+                # TODO когда нет с лева группы то на 1 больше чем заданный лимит ИЛИ НЕТ?
+                # 7 дней выставленно, 1 число не надо!
+
+                # start_point = _range[f'column{_count}_start_col'] + (self.count_group)
+                start_point = _range[f'column{_count}_start_col'] + (self.count_group) - 1
 
                 end_point = _range[f'column{_count}_end_col'] - 1
 
@@ -378,6 +385,23 @@ class ConnectGoogleAlternative:
     def write_position(self, good_range_date, name_sheet, count_google_row, position):
 
         worksheet = self.sheet.worksheet(name_sheet)
+
+        if not position:
+            position = 0
+
+            _count = 0
+
+            test = f"{good_range_date[_count][f'range{_count + 1}']['job_index'][:-1]}{3 + count_google_row}"
+
+            worksheet.format(f'{test}:{test}', {
+                "backgroundColor": {
+                    "red": 1,
+                    "green": 0.0,
+                    "blue": 0.0
+                },
+            })
+
+            time.sleep(1)
 
         position_columns = good_range_date[0]['range1']['job_index_col']
 
