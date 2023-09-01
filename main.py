@@ -17,7 +17,7 @@ def main():
     google_core = GoogleModul(dir_project).connect_sheet()
 
     if PROMO_JOB:
-        data_pars_dict = GooglePromoGetData(google_core).reviews_get_data()
+        data_pars_dict = GooglePromoGetData().reviews_get_data()
 
     print()
 

@@ -4,16 +4,21 @@ from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 
-from settings import ID_SHEET
+from settings import ID_SHEET, NAME_SERVER
 from src.telegram_debug import SendlerOneCreate
 
 
 class ConnectGoogleAlternative:
     def __init__(self):
+
         self.name_columns_1 = 'Позиция в выдаче'
+
         self.name_columns_2 = 'Рез.оценка'
+
         self.name_columns_3 = 'Популярность по запросу'
+
         self.name_columns_4 = 'Продажи товара'
+
         self.name_columns_5 = 'Популярность'
 
         self.micro_sleep = 1
@@ -30,14 +35,27 @@ class ConnectGoogleAlternative:
 
         self.sheet = gc.open_by_key(ID_SHEET)
 
-    def get_range_date_columns(self, name_list, range):
-        worksheet = self.sheet.worksheet(name_list)
+    def get_name_sheets(self):
+
+        list_title_sheet = self.sheet.worksheets()
+
+        return [x.title for x in list_title_sheet]
+
+    def get_range_date_columns(self, name_sheet, range):
+
+        worksheet = self.sheet.worksheet(name_sheet)
 
         list_columns = worksheet.range(range)
 
         return list_columns
 
+    def get_data_by_range(self, start_data_columns, over_data_columns, name_sheet):
+        worksheet = self.sheet.worksheet(name_sheet)
+
+        return worksheet.get_values(f"{start_data_columns}:{over_data_columns}")
+
     def calculation_range_date(self, list_columns):
+
         good_dict = {}
 
         for x in range(5):
@@ -49,47 +67,59 @@ class ConnectGoogleAlternative:
 
             if self.name_columns_1 in column.value:
                 good_dict[f'dict_columns_1']['column1_start'] = column.address[:-1] + '2'
+
                 good_dict[f'dict_columns_1']['column1_start_col'] = column.col
 
             if self.name_columns_2 in column.value:
                 good_dict[f'dict_columns_1']['column1_end'] = list_columns[count - 1].address[:-1] + '2'
+
                 good_dict[f'dict_columns_1']['column1_end_col'] = list_columns[count - 1].col
 
                 good_dict[f'dict_columns_2']['column2_start'] = column.address[:-1] + '2'
+
                 good_dict[f'dict_columns_2']['column2_start_col'] = column.col
 
             if self.name_columns_3 in column.value:
                 good_dict[f'dict_columns_2']['column2_end'] = list_columns[count - 1].address[:-1] + '2'
+
                 good_dict[f'dict_columns_2']['column2_end_col'] = list_columns[count - 1].col
 
                 good_dict[f'dict_columns_3']['column3_start'] = column.address[:-1] + '2'
+
                 good_dict[f'dict_columns_3']['column3_start_col'] = column.col
 
             if self.name_columns_4 in column.value:
                 good_dict[f'dict_columns_3']['column3_end'] = list_columns[count - 1].address[:-1] + '2'
+
                 good_dict[f'dict_columns_3']['column3_end_col'] = list_columns[count - 1].col
 
                 good_dict[f'dict_columns_4']['column4_start'] = column.address[:-1] + '2'
+
                 good_dict[f'dict_columns_4']['column4_start_col'] = column.col
 
             if self.name_columns_5 in column.value and self.name_columns_3 not in column.value:
                 good_dict[f'dict_columns_4']['column4_end'] = list_columns[count - 1].address[:-1] + '2'
+
                 good_dict[f'dict_columns_4']['column4_end_col'] = list_columns[count - 1].col
 
                 good_dict[f'dict_columns_5']['column5_start'] = column.address[:-1] + '2'
+
                 good_dict[f'dict_columns_5']['column5_start_col'] = column.col
 
                 good_dict[f'dict_columns_5']['column5_end'] = list_columns[count + 30].address[:-1] + '2'
+
                 good_dict[f'dict_columns_5']['column5_end_col'] = list_columns[count + 30].col
 
         return good_dict
 
     def get_range_(self, worksheet, start_index, end_index):
         """Получаю значения из таблицы"""
+
         try:
             list_call = worksheet.range(f'{start_index}:{end_index}')
         except Exception as es:
-            msg = (f'Ошибка при получения ренджа для вычисления даты ({start_index} - {end_index}) "{es}"')
+            msg = (
+                f'{NAME_SERVER} Ошибка при получения ренджа для вычисления даты ({start_index} - {end_index}) "{es}"')
 
             print(msg)
 
@@ -113,12 +143,15 @@ class ConnectGoogleAlternative:
 
             try:
                 date_cell = datetime.strptime(date_cell, "%d.%m.%Y")
+
                 day_cell = date_cell.day
+
                 month_cell = date_cell.month
             except:
                 continue
 
             if now_month == month_cell:
+
                 if now_day >= day_cell:
                     list_now_mouth_day.append(count)
 
@@ -153,8 +186,7 @@ class ConnectGoogleAlternative:
     def calculation_last_date(self, dict_range_row, name_sheet):
         """Получаю текущую дату и пробегаю по диапазонам, отправляя их в функцию итерации"""
 
-        # now_day = datetime.now().day
-        now_day = 3
+        now_day = datetime.now().day
 
         now_month = datetime.now().month
 
@@ -205,6 +237,7 @@ class ConnectGoogleAlternative:
             right_count = _range[f"range{_count}"]['right_count']
 
             if left_count > self.count_group:
+
                 difference = left_count - self.count_group
 
                 seven_target = 30 - difference - self.count_group
@@ -219,7 +252,7 @@ class ConnectGoogleAlternative:
 
                 if seven_target > 1:
                     """Если остаются с права колонки то их группируем"""
-                    
+
                     time.sleep(self.micro_sleep)
 
                     start_point = _range[f'column{_count}_end_col'] - seven_target
@@ -246,6 +279,7 @@ class ConnectGoogleAlternative:
         return True
 
     def clear_hide_group_and_create_new_group(self, good_range_date, name_sheet):
+
         worksheet = self.sheet.worksheet(name_sheet)
 
         worksheet.delete_dimension_group_columns(50, 1000)

@@ -1,34 +1,20 @@
 import time
 from datetime import datetime
 
-from settings import NAME_SHEET, ID_SHEET
-from src.google._google_get_sheets_name import GoogleGetSheetsName
+from settings import NAME_SHEET, ID_SHEET, NAME_SERVER
 from src.google.google_alternative import ConnectGoogleAlternative
 from src.google.google_get_name_colums import GoogleGetNameColums
+from src.telegram_debug import SendlerOneCreate
 
 
 class GooglePromoGetData:
-    def __init__(self, google_core):
-        self.google_core = google_core
+    def __init__(self):
         self.count_load_rows = 100000
 
-    def _get_data_job(self, x, y, name_sheet):
-        values = self.google_core.service.spreadsheets().values().get(
-            spreadsheetId=ID_SHEET,
-            range=f'{name_sheet}!{x}:{y}',
-            majorDimension='ROWS'
-        ).execute()
-        try:
-            values = values['values']
-        except:
-            return []
-
-        return values
 
     @staticmethod
     def search_index_columns(list_name_columns):
         ip_list_index = []
-        article = 0
 
         _temp_ip = {}
 
@@ -49,14 +35,14 @@ class GooglePromoGetData:
 
     def reviews_get_data(self):
 
+        google_alternate = ConnectGoogleAlternative()
+
         if NAME_SHEET == []:
-            names_list_sheet = GoogleGetSheetsName(self.google_core).get_name_sheets()
+            names_list_sheet = google_alternate.get_name_sheets()
         else:
             names_list_sheet = NAME_SHEET
 
         _temp = {}
-
-        google_alternate = ConnectGoogleAlternative()
 
         for name_sheet in names_list_sheet:
             _temp[name_sheet] = {}
@@ -88,7 +74,14 @@ class GooglePromoGetData:
 
             _temp[name_sheet]['good_range_date'] = good_range_date
 
-            res_group = google_alternate.clear_hide_group_and_create_new_group(good_range_date, name_sheet)
+            try:
+                res_group = google_alternate.clear_hide_group_and_create_new_group(good_range_date, name_sheet)
+            except Exception as es:
+                msg = f'{NAME_SERVER} Ошибка при создание группы в на странице {name_sheet} ошибка: "{es}"'
+
+                print(msg)
+
+                SendlerOneCreate('').save_text(msg)
 
             # TODO работа по получению индексов столбцов дат===============================
 
@@ -112,7 +105,7 @@ class GooglePromoGetData:
 
             over_data_columns = f"{name_index_list[0]['id'][:-1]}{self.count_load_rows}"
 
-            list_data_job = self._get_data_job(start_data_columns, over_data_columns, name_sheet)
+            list_data_job = google_alternate.get_data_by_range(start_data_columns, over_data_columns, name_sheet)
 
             _temp[name_sheet]['list_data_job'] = list_data_job
 
