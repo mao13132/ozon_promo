@@ -1,8 +1,12 @@
 import os
+
 from datetime import datetime
 
 from settings import PROMO_JOB
+from src.google.google_alternative import ConnectGoogleAlternative
+
 from src.google.google_promo_get_data import GooglePromoGetData
+
 from src.ozon.check_dir import one_start
 
 
@@ -13,8 +17,10 @@ def main():
 
     one_start(dir_project)
 
+    google_alternate = ConnectGoogleAlternative()
+
     if PROMO_JOB:
-        data_pars_dict = GooglePromoGetData().reviews_get_data()
+        data_pars_dict = GooglePromoGetData(google_alternate).reviews_get_data()
 
     print()
 
