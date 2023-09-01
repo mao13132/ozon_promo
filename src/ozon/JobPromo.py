@@ -33,19 +33,21 @@ class JobPromo:
 
         return True
 
-    def job_document(self, request, list_id):
+    def job_document(self, request, list_id, good_range_date, cabinet_name):
 
         if list_id == []:
             return False
 
-        job_documents = JobDocuments(self.driver, self.google_core, list_id, request, self.core_ozon, self.dir_project)\
-            .start_documents()
+        good_id = JobDocuments(self.driver, self.google_core, list_id, request, self.core_ozon,
+                                     self.dir_project, good_range_date).start_documents(cabinet_name)
 
-        print()
+        return good_id
 
-    def iter_row_in_sheet(self, rows_list, cabinet_name):
+    def iter_row_in_sheet(self, rows_list, good_range_date, cabinet_name):
 
         stop_request = []
+
+        stop_id = []
 
         # Захожу первый раз на Ozon
         res_load_ozon = self.core_ozon.start_load_ozon()
@@ -67,11 +69,19 @@ class JobPromo:
             if request not in stop_request:
                 list_id_by_request = {x[-1]: _count for _count, x in enumerate(rows_list) if x[0] == request}
 
-                res_document = self.job_document(request, list_id_by_request)
+                good_id = self.job_document(request, list_id_by_request, good_range_date, cabinet_name)
+
+                if not good_id:
+                    continue
+
+                stop_id.extend(good_id)
 
                 print()
 
             stop_request.append(request)
+
+            if _id in stop_id:
+                continue
 
             self.core_ozon.click_get_search()
 
@@ -80,9 +90,11 @@ class JobPromo:
     def iter_sheets(self):
         # TODO итерация страниц из google
         for cabinet_name, job in self.data_pars_dict.items():
+            good_range_date = job['good_range_date']
+
             job = job['list_data_job']
 
-            res_iter_rows = self.iter_row_in_sheet(job, cabinet_name)
+            res_iter_rows = self.iter_row_in_sheet(job, good_range_date, cabinet_name)
 
             if not res_iter_rows:
                 continue

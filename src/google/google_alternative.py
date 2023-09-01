@@ -292,3 +292,50 @@ class ConnectGoogleAlternative:
         res_group = self._iter_dict_create_group(good_range_date, worksheet)
 
         return True
+
+    def write_data_from_exel_file(self, good_range_date, name_sheet, count_google_row,
+                                  position, rez_ocenka, popular_request, trade_product, popular_total):
+
+        worksheet = self.sheet.worksheet(name_sheet)
+
+        position_columns = good_range_date[0]['range1']['job_index_col']
+
+        job_row = 3 + count_google_row
+
+        worksheet.update_cell(job_row, position_columns, position)
+
+        time.sleep(1)
+
+        rez_ocenka_columns = good_range_date[1]['range2']['job_index_col']
+
+        job_row = 3 + count_google_row
+
+        worksheet.update_cell(job_row, rez_ocenka_columns, rez_ocenka)
+
+        time.sleep(1)
+
+        popular_request_columns = good_range_date[2]['range3']['job_index_col']
+
+        job_row = 3 + count_google_row
+
+        worksheet.update_cell(job_row, popular_request_columns, popular_request)
+
+        time.sleep(1)
+
+        trade_product_columns = good_range_date[3]['range4']['job_index_col']
+
+        job_row = 3 + count_google_row
+
+        worksheet.update_cell(job_row, trade_product_columns, trade_product)
+
+        time.sleep(1)
+
+        popular_total_columns = good_range_date[4]['range5']['job_index_col']
+
+        job_row = 3 + count_google_row
+
+        worksheet.update_cell(job_row, popular_total_columns, popular_total)
+
+        print()
+
+        return True

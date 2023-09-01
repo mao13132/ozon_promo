@@ -2,10 +2,9 @@ import time
 
 from settings import NAME_SERVER
 from src.ozon._check_dir import get_all_name_file
-from src.ozon.job_cabinet import JobCabinet
+from src.ozon.job_insert_files_data import JobInsertFilesData
 from src.ozon.job_region import JobRegion
 from src.ozon.job_request_search import JobRequestsSearch
-from src.ozon.start_ozon import StartOzon
 from selenium.webdriver.support.ui import WebDriverWait
 
 from selenium.webdriver.common.by import By
@@ -13,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 class JobDocuments:
-    def __init__(self, driver, google_core, list_id, request, core_ozon, dir_project):
+    def __init__(self, driver, google_core, list_id, request, core_ozon, dir_project, good_range_date):
         self.driver = driver
         self.google_core = google_core
         self.list_id = list_id
@@ -21,6 +20,7 @@ class JobDocuments:
         self.core_ozon = core_ozon
         self.old_files_name = []
         self.dir_project = dir_project
+        self.good_range_date = good_range_date
 
     def check_start_download(self):
         try:
@@ -116,55 +116,49 @@ class JobDocuments:
 
         return new_file_name
 
-    def job_one_cabinet(self):
-
-        good_result_list = []
+    def download_file_by_request(self):
 
         print(f'Всего ключевых слов {len(self.list_id)}')
 
-        for row, count_row in self.list_id.items():
+        res_load_ozon = self.core_ozon.load_ozon_bussines()
 
-            res_load_ozon = self.core_ozon.load_ozon_bussines()
+        if not res_load_ozon:
+            print(f'{NAME_SERVER} Не смог открыть странницу с загрузкой exel файлов')
+            return False
 
-            if not res_load_ozon:
-                print(f'{NAME_SERVER} Не смог открыть странницу с загрузкой exel файлов')
-                return False
+        input_data_list = self.get_input_list()
 
-            input_data_list = self.get_input_list()
+        if not input_data_list:
+            print(f'Не могу определить поля для заполнения в ozon')
+            return False
 
-            if not input_data_list:
-                print(f'Не могу определить поля для заполнения в ozon')
-                continue
+        res_insert_requests = JobRequestsSearch(self.driver).start_job_search(input_data_list[0], self.request)
 
-            res_insert_requests = JobRequestsSearch(self.driver).start_job_search(input_data_list[0], self.request)
+        res_job_region = JobRegion(self.driver).start_job_region(input_data_list[1], 'Москва')
 
-            res_job_region = JobRegion(self.driver).start_job_region(input_data_list[1], 'Москва')
+        res_finish_click_but = self.click_result_button()
 
-            res_finish_click_but = self.click_result_button()
+        res_load_page = self.check_load_page(f'//*[contains(text(), "Скачать отчёт")]')
 
-            res_load_page = self.check_load_page(f'//*[contains(text(), "Скачать отчёт")]')
+        if not res_load_page:
+            print(f'Не смог загрузить данные для скачивания')
+            return False
 
-            if not res_load_page:
-                print(f'Не смог загрузить данные для скачивания')
-                continue
+        res_click_download = self.download_button()
 
-            res_click_download = self.download_button()
+        res_start_download = self.loop_wait_start_download()
 
-            res_start_download = self.loop_wait_start_download()
+        time.sleep(1)
 
-            time.sleep(1)
+        res_end_download = WebDriverWait(self.driver, 20, 1).until(self.end_download)
 
-            res_end_dowload = WebDriverWait(self.driver, 20, 1).until(self.end_download)
+        file_name = self.get_file_name_down()
 
-            file_name = self.get_file_name_down()
+        if file_name == '':
+            print(f'Нет файла exel надо ответить или ещё раз скачать')
+            return False
 
-            if file_name == '':
-                continue
-
-            # job_write_document = JobInsertFilesData(good_result_list, self.google_core).start_iter_files(
-            #     cursor_end, self.good_write_count)
-
-        return good_result_list
+        return file_name
 
     def count_my_products(self):
 
@@ -178,43 +172,16 @@ class JobDocuments:
 
         return good_list
 
-    def get_formated_cabinet_keyboards(self):
+    def start_documents(self, cabinet_name):
 
-        good_list = []
+        file_name = self.download_file_by_request()
 
-        stop_list = []
+        if not file_name:
+            return False
 
-        count_my_products = self.count_my_products()
+        good_id = JobInsertFilesData(self.list_id, self.google_core, self.good_range_date)\
+            .start_iter_files(file_name, cabinet_name)
 
-        # TODO посчитать сколько товаров по каждому ключевику
+        print(f'Закончил обработку ID в файлах и их запись')
 
-        for row in self.list_id:
-
-            if row['request'] == '':
-                continue
-
-            stop_string = f"{row['name_sheet']}|{row['request']}"
-
-            if stop_string in stop_list:
-                continue
-
-            stop_list.append(stop_string)
-
-            _temp_dict = {}
-
-            _temp_dict['name_sheet'] = row['name_sheet']
-            _temp_dict['request'] = row['request']
-            _temp_dict['my_products'] = count_my_products[row['request']]
-
-            good_list.append(_temp_dict)
-
-        # return return_list
-        return good_list
-
-    def start_documents(self):
-
-        data_files_sheet = self.job_one_cabinet()
-
-        print(f'Закончил скачивание файлов')
-
-        return data_files_sheet
+        return good_id
