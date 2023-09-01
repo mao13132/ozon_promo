@@ -51,6 +51,46 @@ class ConnectGoogleAlternative:
 
         return list_columns
 
+    def clear_color_range(self, dict_, name_sheet):
+        worksheet = self.sheet.worksheet(name_sheet)
+
+        for _count in range(5):
+            _range = f"{dict_[_count][f'range{_count + 1}']['job_index'][:-1]}3"
+            _range2 = f"{dict_[_count][f'range{_count + 1}']['job_index'][:-1]}1000000"
+
+            worksheet.format(f'{_range}:{_range2}', {
+                "backgroundColor": {
+                    'red': 255 / 255,
+                    'green': 255 / 255,
+                    'blue': 255 / 255
+                },
+            })
+
+            time.sleep(1)
+
+    def write_title(self, dict_, name_sheet, now_date):
+        worksheet = self.sheet.worksheet(name_sheet)
+
+        for _count in range(5):
+            _columns = dict_[_count][f'range{_count + 1}']['job_index_col']
+
+            worksheet.update_cell(2, _columns, now_date)
+
+        return True
+
+    def clear_data_range(self, dict_, name_sheet):
+        worksheet = self.sheet.worksheet(name_sheet)
+
+        columns1 = f"{dict_[0]['range1']['job_index'][:-1]}3:{dict_[0]['range1']['job_index'][:-1]}50"
+        columns2 = f"{dict_[1]['range2']['job_index'][:-1]}3:{dict_[1]['range2']['job_index'][:-1]}1000000"
+        columns3 = f"{dict_[2]['range3']['job_index'][:-1]}3:{dict_[2]['range3']['job_index'][:-1]}1000000"
+        columns4 = f"{dict_[3]['range4']['job_index'][:-1]}3:{dict_[3]['range4']['job_index'][:-1]}1000000"
+        columns5 = f"{dict_[4]['range5']['job_index'][:-1]}3:{dict_[4]['range5']['job_index'][:-1]}1000000"
+
+        worksheet.batch_clear([columns1, columns2, columns3, columns4, columns5])
+
+        return True
+
     def get_data_by_range(self, start_data_columns, over_data_columns, name_sheet):
         worksheet = self.sheet.worksheet(name_sheet)
 
@@ -185,12 +225,8 @@ class ConnectGoogleAlternative:
 
         return job_columns
 
-    def calculation_last_date(self, dict_range_row, name_sheet):
+    def calculation_last_date(self, dict_range_row, name_sheet, now_day, now_month):
         """Получаю текущую дату и пробегаю по диапазонам, отправляя их в функцию итерации"""
-
-        now_day = datetime.now().day
-
-        now_month = datetime.now().month
 
         worksheet = self.sheet.worksheet(name_sheet)
 
@@ -350,7 +386,6 @@ class ConnectGoogleAlternative:
         worksheet.update_cell(job_row, position_columns, position)
 
         for x in range(4):
-
             _count = x + 1
 
             test = f"{good_range_date[_count][f'range{_count + 1}']['job_index'][:-1]}{3 + count_google_row}"

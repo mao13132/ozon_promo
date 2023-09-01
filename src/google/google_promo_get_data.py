@@ -34,6 +34,15 @@ class GooglePromoGetData:
 
     def reviews_get_data(self):
 
+        now_day = datetime.now().day
+
+        now_month = 10
+        # now_month = datetime.now().month
+
+        now_yer = datetime.now().year
+
+        now_date = f'{now_day}.{now_month}.{now_yer}'
+
         if NAME_SHEET == []:
             names_list_sheet = self.google_alternate.get_name_sheets()
         else:
@@ -65,26 +74,27 @@ class GooglePromoGetData:
 
             time.sleep(1)
 
-            good_range_date = self.google_alternate.calculation_last_date(dict_range_date, name_sheet)
+            good_range_date = self.google_alternate.calculation_last_date(dict_range_date, name_sheet,
+                                                                          now_day, now_month)
 
             time.sleep(1)
 
             _temp[name_sheet]['good_range_date'] = good_range_date
-            #
-            # try:
-            #     res_group = self.google_alternate.clear_hide_group_and_create_new_group(good_range_date, name_sheet)
-            # except Exception as es:
-            #     msg = f'{NAME_SERVER} Ошибка при создание группы в на странице {name_sheet} ошибка: "{es}"'
-            #
-            #     print(msg)
-            #
-            #     SendlerOneCreate('').save_text(msg)
-            #
-            # # TODO работа по получению индексов столбцов дат===============================
-            #
-            # print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} '
-            #       f'Получаю данные для построения отчёта эффективности с вкладки {name_sheet}')
-            #
+
+            try:
+                res_group = self.google_alternate.clear_hide_group_and_create_new_group(good_range_date, name_sheet)
+            except Exception as es:
+                msg = f'{NAME_SERVER} Ошибка при создание группы в на странице {name_sheet} ошибка: "{es}"'
+
+                print(msg)
+
+                SendlerOneCreate('').save_text(msg)
+
+            # TODO работа по получению индексов столбцов дат===============================
+
+            print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} '
+                  f'Получаю данные для построения отчёта эффективности с вкладки {name_sheet}')
+
             range_date_list = self.google_alternate.get_range_date_columns(name_sheet, 'A2:BP2')
 
             time.sleep(1)
@@ -101,6 +111,12 @@ class GooglePromoGetData:
             start_data_columns = f"{name_index_list[0]['request_inx'][:-1]}3"
 
             over_data_columns = f"{name_index_list[0]['id'][:-1]}{self.count_load_rows}"
+
+            list_data_job = self.google_alternate.write_title(good_range_date, name_sheet, now_date)
+
+            list_data_job = self.google_alternate.clear_data_range(good_range_date, name_sheet)
+
+            list_data_job = self.google_alternate.clear_color_range(good_range_date, name_sheet)
 
             list_data_job = self.google_alternate.get_data_by_range(start_data_columns, over_data_columns, name_sheet)
 
