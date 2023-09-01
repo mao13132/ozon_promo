@@ -4,12 +4,6 @@ from pathlib import Path
 
 from settings import NAME_API_FILE
 
-from oauth2client.service_account import ServiceAccountCredentials
-
-import httplib2
-
-import apiclient
-
 
 class GoogleModul:
     def __init__(self, dir_project):
