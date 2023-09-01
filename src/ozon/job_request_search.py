@@ -71,7 +71,7 @@ class JobRequestsSearch:
         while True:
             count += 1
             if count > count_try:
-                print(f'Не смог вставить поисковый запрос')
+                print(f'Не смог вставить поисковый запрос {request}')
                 return False
 
             _request = self.get_value_search(row)

@@ -118,8 +118,6 @@ class JobDocuments:
 
     def download_file_by_request(self):
 
-        print(f'Всего ключевых слов {len(self.list_id)}')
-
         res_load_ozon = self.core_ozon.load_ozon_bussines()
 
         if not res_load_ozon:
@@ -155,7 +153,7 @@ class JobDocuments:
         file_name = self.get_file_name_down()
 
         if file_name == '':
-            print(f'Нет файла exel надо ответить или ещё раз скачать')
+            print(f'Не скачался exel file')
             return False
 
         return file_name
@@ -182,6 +180,6 @@ class JobDocuments:
         good_id = JobInsertFilesData(self.list_id, self.google_core, self.good_range_date)\
             .start_iter_files(file_name, cabinet_name)
 
-        print(f'Закончил обработку ID в файлах и их запись')
+        print(f'Закончил обработку в файле нашёл {good_id}')
 
         return good_id

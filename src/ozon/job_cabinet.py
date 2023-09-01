@@ -133,7 +133,7 @@ class JobCabinet:
 
     def loop_change_cabinet(self, name_cabinet):
         count = 0
-        count_try = 10
+        count_try = 20
         while True:
             count += 1
             if count > count_try:
@@ -163,7 +163,7 @@ class JobCabinet:
     def check_name_cabinet(self, name_cabinet):
         _name_cabinet = self.get_name_cabinet()
 
-        if _name_cabinet != name_cabinet:
+        if _name_cabinet.lower() != name_cabinet.lower():
             return False
 
         return True

@@ -46,6 +46,8 @@ class JobInsertFilesData:
             except:
                 continue
 
+            print(f'- Записываю значения для ID: {_id}')
+
             res_write = self.google_core.write_data_from_exel_file(self.good_range_date, cabinet_name, count_google_row,
                                                                    position, rez_ocenka, popular_request, trade_product,
                                                                    popular_total)

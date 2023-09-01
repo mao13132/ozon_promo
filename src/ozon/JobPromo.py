@@ -3,8 +3,12 @@ import time
 from datetime import datetime
 
 from settings import NAME_SERVER
+from src.ozon.job_article import JobArticle
 from src.ozon.job_cabinet import JobCabinet
 from src.ozon.job_documents import JobDocuments
+from src.ozon.job_get_result import GetGetResult
+from src.ozon.job_region import JobRegion
+from src.ozon.job_request_search import JobRequestsSearch
 from src.ozon.start_ozon import StartOzon
 from src.telegram_debug import SendlerOneCreate
 
@@ -39,9 +43,43 @@ class JobPromo:
             return False
 
         good_id = JobDocuments(self.driver, self.google_core, list_id, request, self.core_ozon,
-                                     self.dir_project, good_range_date).start_documents(cabinet_name)
+                               self.dir_project, good_range_date).start_documents(cabinet_name)
+
+        if good_id == []:
+            return ['null']
 
         return good_id
+
+    def check_position(self, request, article):
+        res_load_ozon = self.core_ozon.start_load_ozon()
+
+        self.core_ozon.click_get_search()
+
+        input_data_list = self.core_ozon.get_input_list()
+
+        if not input_data_list:
+            print(f'Не могу определить поля для заполнения в ozon')
+            return False
+
+        res_job_article = JobArticle(self.driver, self.core_ozon).start_job_article(article, input_data_list[2])
+
+        if not res_job_article:
+            return False
+
+        res_job_region = JobRegion(self.driver).start_job_region(input_data_list[1], 'Москва')
+
+        res_insert_requests = JobRequestsSearch(self.driver).start_job_search(input_data_list[0], request)
+
+        res_finish_click_but = self.core_ozon.finish_button_search()
+
+        res_good_res = self.core_ozon.check_load_good(f"//tbody//tr[contains(@class, 'row')]//td")
+
+        result = GetGetResult(self.driver).start_job_get_result()
+
+        if not result:
+            return False
+
+        return result
 
     def iter_row_in_sheet(self, rows_list, good_range_date, cabinet_name):
 
@@ -55,37 +93,94 @@ class JobPromo:
         if not res_load_ozon:
             return False
 
-        # Переключаю кабинет
-        res_ozon = self.change_cabinet(cabinet_name)
+        count = 0
+        count_try = 3
 
-        if not res_ozon:
-            return False
+        while True:
+
+            count += 1
+
+            if count > count_try:
+                return False
+
+            # Переключаю кабинет
+            res_ozon = self.change_cabinet(cabinet_name)
+
+            if not res_ozon:
+                continue
+
+            break
 
         # TODO итерация строчек из таблицы
-        for count, row in enumerate(rows_list):
+        for count_, row in enumerate(rows_list):
 
             request, _, name, _, article, _id = row
 
+            if request == '' or article == '':
+                print(f'! У "{name}" пустое значение пропускаю "{article}" "{request}"')
+                continue
+
             if request not in stop_request:
+
                 list_id_by_request = {x[-1]: _count for _count, x in enumerate(rows_list) if x[0] == request}
 
-                good_id = self.job_document(request, list_id_by_request, good_range_date, cabinet_name)
+                print(
+                    f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Начинаю загружать файл для запроса "{request}" '
+                    f'с ID: {list_id_by_request}')
 
-                if not good_id:
-                    continue
+                count = 0
+                count_try = 3
 
-                stop_id.extend(good_id)
+                while True:
 
-                print()
+                    count += 1
+
+                    if count > count_try:
+                        print(f'Прекратил попытки работы с файлами')
+                        break
+
+                    good_id = self.job_document(request, list_id_by_request, good_range_date, cabinet_name)
+
+                    if not good_id:
+                        print(f'Пробую ещё раз работу с файлом')
+                        continue
+
+                    stop_id.extend(good_id)
+
+                    break
 
             stop_request.append(request)
 
             if _id in stop_id:
                 continue
 
-            self.core_ozon.click_get_search()
+            if article in stop_id:
+                continue
 
-            print(row)
+            print(f'ID: {_id} с запросом "{request}" нет в файлах Exel. Получаю его место в поиске дополнительно')
+
+            count = 0
+            count_try = 3
+
+            while True:
+
+                count += 1
+
+                if count > count_try:
+                    break
+
+                position = self.check_position(request, article)
+
+                if not position:
+                    continue
+
+                break
+
+            stop_request.append(article)
+
+            res_write_position = self.google_core.write_position(good_range_date, cabinet_name, count_, position)
+
+        return True
 
     def iter_sheets(self):
         # TODO итерация страниц из google
@@ -99,9 +194,14 @@ class JobPromo:
             if not res_iter_rows:
                 continue
 
-            print()
+            print(f'\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Закончил обработку {cabinet_name}\n')
+
+        print(f'\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Обработал все кабинеты\n')
+
+        return True
 
     def start_promo(self):
+
         res_iter = self.iter_sheets()
 
         print()

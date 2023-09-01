@@ -6,6 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 
 from settings import ID_SHEET, NAME_SERVER
+
 from src.telegram_debug import SendlerOneCreate
 
 
@@ -336,6 +337,32 @@ class ConnectGoogleAlternative:
 
         worksheet.update_cell(job_row, popular_total_columns, popular_total)
 
-        print()
+        return True
+
+    def write_position(self, good_range_date, name_sheet, count_google_row, position):
+
+        worksheet = self.sheet.worksheet(name_sheet)
+
+        position_columns = good_range_date[0]['range1']['job_index_col']
+
+        job_row = 3 + count_google_row
+
+        worksheet.update_cell(job_row, position_columns, position)
+
+        for x in range(4):
+
+            _count = x + 1
+
+            test = f"{good_range_date[_count][f'range{_count + 1}']['job_index'][:-1]}{3 + count_google_row}"
+
+            worksheet.format(f'{test}:{test}', {
+                "backgroundColor": {
+                    "red": 1,
+                    "green": 0.0,
+                    "blue": 0.0
+                },
+            })
+
+            time.sleep(1)
 
         return True
