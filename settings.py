@@ -4,12 +4,12 @@ ID_SHEET = '1IDLaPlkoMwpnfA0hhcJLFNpmPwkx7xzxI0iV7nsIFlA'
 
 BLACK_NAME = []
 
-NAME_SHEET = []
-# NAME_SHEET = ["Severli"]
+# NAME_SHEET = []
+NAME_SHEET = ["Greenformula"]
 
 PHONE = '9648325336'  # Без 7 и 8
 
-NAME_PROFILE = 'promo'
+NAME_PROFILE = 'promo2'
 
 NAME_SERVER = 'My_comp'
 

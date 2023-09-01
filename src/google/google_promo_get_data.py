@@ -46,45 +46,45 @@ class GooglePromoGetData:
 
             # TODO работа по получению индексов столбцов дат===============================
 
-            print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} '
-                  f'Высчитываю данные для группировки колонок на {name_sheet}')
-
-            try:
-                range_date_list = self.google_alternate.get_range_date_columns(name_sheet, 'AZ1:ZZ1')
-            except:
-                print(f'Ошибка при получение данных с вкладки {name_sheet}')
-                continue
-
-            time.sleep(1)
-
-            if range_date_list == []:
-                print(f'Не найдены данные на {name_sheet}')
-                continue
-
-            dict_range_date = self.google_alternate.calculation_range_date(range_date_list)
-
-            time.sleep(1)
-
-            good_range_date = self.google_alternate.calculation_last_date(dict_range_date, name_sheet)
-
-            time.sleep(1)
-
-            _temp[name_sheet]['good_range_date'] = good_range_date
-
-            try:
-                res_group = self.google_alternate.clear_hide_group_and_create_new_group(good_range_date, name_sheet)
-            except Exception as es:
-                msg = f'{NAME_SERVER} Ошибка при создание группы в на странице {name_sheet} ошибка: "{es}"'
-
-                print(msg)
-
-                SendlerOneCreate('').save_text(msg)
-
-            # TODO работа по получению индексов столбцов дат===============================
-
-            print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} '
-                  f'Получаю данные для построения отчёта эффективности с вкладки {name_sheet}')
-
+            # print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} '
+            #       f'Высчитываю данные для группировки колонок на {name_sheet}')
+            #
+            # try:
+            #     range_date_list = self.google_alternate.get_range_date_columns(name_sheet, 'AZ1:ZZ1')
+            # except:
+            #     print(f'Ошибка при получение данных с вкладки {name_sheet}')
+            #     continue
+            #
+            # time.sleep(1)
+            #
+            # if range_date_list == []:
+            #     print(f'Не найдены данные на {name_sheet}')
+            #     continue
+            #
+            # dict_range_date = self.google_alternate.calculation_range_date(range_date_list)
+            #
+            # time.sleep(1)
+            #
+            # good_range_date = self.google_alternate.calculation_last_date(dict_range_date, name_sheet)
+            #
+            # time.sleep(1)
+            #
+            # _temp[name_sheet]['good_range_date'] = good_range_date
+            #
+            # try:
+            #     res_group = self.google_alternate.clear_hide_group_and_create_new_group(good_range_date, name_sheet)
+            # except Exception as es:
+            #     msg = f'{NAME_SERVER} Ошибка при создание группы в на странице {name_sheet} ошибка: "{es}"'
+            #
+            #     print(msg)
+            #
+            #     SendlerOneCreate('').save_text(msg)
+            #
+            # # TODO работа по получению индексов столбцов дат===============================
+            #
+            # print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} '
+            #       f'Получаю данные для построения отчёта эффективности с вкладки {name_sheet}')
+            #
             range_date_list = self.google_alternate.get_range_date_columns(name_sheet, 'A2:BP2')
 
             time.sleep(1)

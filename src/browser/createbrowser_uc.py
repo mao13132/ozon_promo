@@ -2,6 +2,7 @@ import os
 import platform
 
 import undetected_chromedriver as uc
+from selenium.webdriver.chrome.service import Service
 
 import getpass
 
@@ -12,7 +13,7 @@ class CreatBrowser:
 
     def create_dir(self):
         from pathlib import Path
-        _dirs_project = Path(f"{os.getcwd()}\download")
+        _dirs_project = Path(f"{os.getcwd()}/src/browser/download")
 
         dir_s = 'C:\\'
         for x in _dirs_project.parts[1:]:
@@ -20,14 +21,10 @@ class CreatBrowser:
 
         return dir_s
 
-    def __init__(self):
+
+    def __init__(self, dir_project):
 
         platform_to_os = platform.system()
-
-        if platform_to_os == "Linux":
-            from xvfbwrapper import Xvfb
-            vdisplay = Xvfb(width=1280, height=720)
-            vdisplay.start()
 
         platform_to_os = platform.system()
         options = uc.ChromeOptions()
@@ -42,8 +39,10 @@ class CreatBrowser:
 
         if platform_to_os == "Linux":
             path_dir = (f'/Users/{user_system}/Library/Application Support/Google/Chrome/{name_profile}')
+            _patch = f"{dir_project}/src/browser/chromedriver.exe"
         else:
             path_dir = (f'C:\\Users\\{user_system}\\AppData\\Local\\Google\\Chrome\\User Data\\{name_profile}')
+            _patch = f"{dir_project}\\src\\browser\\chromedriver.exe"
 
         options.add_argument(f'--user-data-dir={path_dir}')
 
@@ -54,19 +53,18 @@ class CreatBrowser:
             f"Chrome/114.0.0.0 Safari/537.36")
 
         _dirs = self.create_dir()
+
+        [os.remove(os.path.join(os.path.dirname(__file__), _dirs, x)) for x in os.listdir(_dirs)]
+
         prefs = {"download.default_directory": _dirs}
+
         options.add_experimental_option("prefs", prefs)
 
-        try:
-            self.driver = uc.Chrome(options=options)
-
-        except Exception as es:
-            print(f'Ошибка создания браузера {es}')
-            return False
+        self.driver = uc.Chrome(driver_executable_path=_patch, options=options)
 
         try:
             browser_version = self.driver.capabilities['browserVersion']
             driver_version = self.driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0]
-            print(f"Браузер: {browser_version} драйвер: {driver_version}")
+            print(f"\nБраузер: {browser_version} драйвер: {driver_version}")
         except:
-            print(f'Не получилось определить версию uc браузера')
+            print(f'\nНе получилось определить версию uc браузера')
