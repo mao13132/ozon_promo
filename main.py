@@ -37,7 +37,7 @@ def main():
         print(f'\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Закончил работу\n')
 
     except Exception as es:
-        msg = f'{NAME_SERVER} Ошибка при создание браузера ошибка: "{es}"'
+        msg = f'{NAME_SERVER} Ошибка main поток ошибка: "{es}"'
 
         print(msg)
 

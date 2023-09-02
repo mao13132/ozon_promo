@@ -177,8 +177,11 @@ class JobDocuments:
         if not file_name:
             return False
 
-        good_id = JobInsertFilesData(self.list_id, self.google_core, self.good_range_date)\
+        good_id = JobInsertFilesData(self.list_id, self.google_core, self.good_range_date, self.dir_project
+                                     , self.request)\
             .start_iter_files(file_name, cabinet_name)
+
+        print(f'Скачал файл "{file_name}"')
 
         print(f'Закончил обработку в файле нашёл {good_id}')
 

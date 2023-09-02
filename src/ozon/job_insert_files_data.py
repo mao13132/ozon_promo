@@ -4,13 +4,16 @@ from datetime import datetime
 import openpyxl
 
 from settings import ID_SHEET
+from src.ozon._check_dir import clear_folder
 
 
 class JobInsertFilesData:
-    def __init__(self, job_list, google_core, good_range_date):
+    def __init__(self, job_list, google_core, good_range_date, dir_project, request):
         self.job_list = job_list
         self.google_core = google_core
         self.good_range_date = good_range_date
+        self.dir_project = dir_project
+        self.request = request
 
     def load_exel_file(self, file):
         try:
@@ -52,7 +55,7 @@ class JobInsertFilesData:
                                                                    position, rez_ocenka, popular_request, trade_product,
                                                                    popular_total)
 
-            good_id.append(str(_id))
+            good_id.append(f'{_id}_{self.request}')
 
         return good_id
 
@@ -63,6 +66,8 @@ class JobInsertFilesData:
         if not res_load:
             print(f'Не смог загрузить файл екселя')
             return False
+
+        clear_folder(self.dir_project)
 
         rows_exel = self.get_rows_exel(res_load)
 

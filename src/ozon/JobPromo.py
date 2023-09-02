@@ -81,6 +81,24 @@ class JobPromo:
 
         return result
 
+    def formated_value(self, value):
+        try:
+            value = value.strip()
+        except:
+            value = value
+
+        try:
+            value = value.replace('\t', '')
+        except:
+            value = value
+
+        try:
+            value = value.replace('\n', '')
+        except:
+            value = value
+
+        return value
+
     def iter_row_in_sheet(self, rows_list, good_range_date, cabinet_name):
 
         stop_request = []
@@ -114,15 +132,21 @@ class JobPromo:
         # TODO итерация строчек из таблицы
         for count_, row in enumerate(rows_list):
 
-            request, _, name, _, article, _id = row
+            _request, _, name, _, article, _id = row
 
-            if request == '' or article == '':
-                print(f'! У "{name}" пустое значение пропускаю "{article}" "{request}"')
+            if _request == '' or article == '':
+                print(f'! У "{name}" пустое значение пропускаю "{article}" "{_request}"')
                 continue
+
+            request = self.formated_value(_request)
+
+            article = self.formated_value(article)
+
+            _id = self.formated_value(_id)
 
             if request not in stop_request:
 
-                list_id_by_request = {x[-1]: _count for _count, x in enumerate(rows_list) if x[0] == request}
+                list_id_by_request = {x[-1]: _count for _count, x in enumerate(rows_list) if x[0] == _request}
 
                 print(
                     f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Начинаю загружать файл для запроса "{request}" '
@@ -151,7 +175,7 @@ class JobPromo:
 
             stop_request.append(request)
 
-            if _id in stop_id:
+            if f"{_id}_{request}" in stop_id:
                 continue
 
             if article in stop_id:
@@ -178,7 +202,8 @@ class JobPromo:
 
             stop_request.append(article)
 
-            res_write_position = self.google_core.write_position(good_range_date, cabinet_name, count_, position)
+            res_write_position = self.google_core.write_position_no_document(good_range_date, cabinet_name,
+                                                                             count_, position)
 
         return True
 
@@ -204,4 +229,4 @@ class JobPromo:
 
         res_iter = self.iter_sheets()
 
-        print()
+        return True

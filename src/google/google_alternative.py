@@ -79,15 +79,15 @@ class ConnectGoogleAlternative:
         return True
 
     def clear_data_range(self, dict_, name_sheet):
+        columns_list = []
+
         worksheet = self.sheet.worksheet(name_sheet)
 
-        columns1 = f"{dict_[0]['range1']['job_index'][:-1]}3:{dict_[0]['range1']['job_index'][:-1]}50"
-        columns2 = f"{dict_[1]['range2']['job_index'][:-1]}3:{dict_[1]['range2']['job_index'][:-1]}1000000"
-        columns3 = f"{dict_[2]['range3']['job_index'][:-1]}3:{dict_[2]['range3']['job_index'][:-1]}1000000"
-        columns4 = f"{dict_[3]['range4']['job_index'][:-1]}3:{dict_[3]['range4']['job_index'][:-1]}1000000"
-        columns5 = f"{dict_[4]['range5']['job_index'][:-1]}3:{dict_[4]['range5']['job_index'][:-1]}1000000"
+        for x in range(5):
+            columns_list.append(
+                f"{dict_[x][f'range{x + 1}']['job_index'][:-1]}3:{dict_[x][f'range{x + 1}']['job_index'][:-1]}1000000")
 
-        worksheet.batch_clear([columns1, columns2, columns3, columns4, columns5])
+        worksheet.batch_clear(columns_list)
 
         return True
 
@@ -307,10 +307,7 @@ class ConnectGoogleAlternative:
                     worksheet._hide_dimension(start_point, end_point, 'COLUMNS')
 
             if right_count > 1 and seven_target == 0:
-                # TODO когда нет с лева группы то на 1 больше чем заданный лимит ИЛИ НЕТ?
-                # 7 дней выставленно, 1 число не надо!
 
-                # start_point = _range[f'column{_count}_start_col'] + (self.count_group)
                 start_point = _range[f'column{_count}_start_col'] + (self.count_group) - 1
 
                 end_point = _range[f'column{_count}_end_col'] - 1
@@ -339,6 +336,9 @@ class ConnectGoogleAlternative:
 
     def write_data_from_exel_file(self, good_range_date, name_sheet, count_google_row,
                                   position, rez_ocenka, popular_request, trade_product, popular_total):
+
+        if position == '':
+            print(f'Пустое значение словить')
 
         worksheet = self.sheet.worksheet(name_sheet)
 
@@ -382,11 +382,11 @@ class ConnectGoogleAlternative:
 
         return True
 
-    def write_position(self, good_range_date, name_sheet, count_google_row, position):
+    def write_position_no_document(self, good_range_date, name_sheet, count_google_row, position):
 
         worksheet = self.sheet.worksheet(name_sheet)
 
-        if not position:
+        if not position or position == '-':
             position = 0
 
             _count = 0

@@ -142,7 +142,7 @@ class StartOzon():
 
     def loop_insert_article(self, article):
         count = 0
-        count_try = 5
+        count_try = 2
         while True:
             count += 1
             if count > count_try:
