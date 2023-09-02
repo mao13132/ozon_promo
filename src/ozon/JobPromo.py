@@ -132,7 +132,11 @@ class JobPromo:
         # TODO итерация строчек из таблицы
         for count_, row in enumerate(rows_list):
 
-            _request, _, name, _, article, _id = row
+            try:
+                _request, _, name, _, article, _id = row
+            except Exception as es:
+                print(f'Пропускаю строку {row} ответ: {es}')
+                continue
 
             if _request == '' or article == '':
                 print(f'! У "{name}" пустое значение пропускаю "{article}" "{_request}"')
