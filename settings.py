@@ -4,7 +4,7 @@ ID_SHEET = '1mKd5XKygJEKB06VrqySXuTu4vvVua8YljQUAfcbB1tE'
 
 BLACK_NAME = []
 
-NAME_SHEET = ['Benerich']
+NAME_SHEET = []
 # NAME_SHEET = ["Greenformula"]
 
 PHONE = '9648325336'  # Без 7 и 8

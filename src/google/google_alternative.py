@@ -45,53 +45,103 @@ class ConnectGoogleAlternative:
 
     def get_range_date_columns(self, name_sheet, range):
 
-        worksheet = self.sheet.worksheet(name_sheet)
+        try:
 
-        list_columns = worksheet.range(range)
+            worksheet = self.sheet.worksheet(name_sheet)
+
+            list_columns = worksheet.range(range)
+
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка get_range_date_columns: "{es}"'
+
+            print(msg)
+
+            SendlerOneCreate('').save_text(msg)
+
+            return False
 
         return list_columns
 
     def clear_color_range(self, dict_, name_sheet):
-        worksheet = self.sheet.worksheet(name_sheet)
 
-        for _count in range(5):
-            _range = f"{dict_[_count][f'range{_count + 1}']['job_index'][:-1]}3"
-            _range2 = f"{dict_[_count][f'range{_count + 1}']['job_index'][:-1]}1000000"
+        try:
 
-            worksheet.format(f'{_range}:{_range2}', {
-                "backgroundColor": {
-                    'red': 255 / 255,
-                    'green': 255 / 255,
-                    'blue': 255 / 255
-                },
-            })
+            worksheet = self.sheet.worksheet(name_sheet)
 
-            time.sleep(1)
+            for _count in range(5):
+                _range = f"{dict_[_count][f'range{_count + 1}']['job_index'][:-1]}3"
+                _range2 = f"{dict_[_count][f'range{_count + 1}']['job_index'][:-1]}1000000"
+
+                worksheet.format(f'{_range}:{_range2}', {
+                    "backgroundColor": {
+                        'red': 255 / 255,
+                        'green': 255 / 255,
+                        'blue': 255 / 255
+                    },
+                })
+
+                time.sleep(1)
+
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка clear_color_range: "{es}"'
+
+            print(msg)
+
+            SendlerOneCreate('').save_text(msg)
+
+            return False
+
+        return True
 
     def write_title(self, dict_, name_sheet, now_date):
-        worksheet = self.sheet.worksheet(name_sheet)
 
-        for _count in range(5):
-            _columns = dict_[_count][f'range{_count + 1}']['job_index_col']
+        try:
 
-            worksheet.update_cell(2, _columns, now_date)
+            worksheet = self.sheet.worksheet(name_sheet)
+
+            for _count in range(5):
+                _columns = dict_[_count][f'range{_count + 1}']['job_index_col']
+
+                worksheet.update_cell(2, _columns, now_date)
+
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка write_title: "{es}"'
+
+            print(msg)
+
+            SendlerOneCreate('').save_text(msg)
+
+            return False
 
         return True
 
     def clear_data_range(self, dict_, name_sheet):
-        columns_list = []
 
-        worksheet = self.sheet.worksheet(name_sheet)
+        try:
 
-        for x in range(5):
-            columns_list.append(
-                f"{dict_[x][f'range{x + 1}']['job_index'][:-1]}3:{dict_[x][f'range{x + 1}']['job_index'][:-1]}1000000")
+            columns_list = []
 
-        worksheet.batch_clear(columns_list)
+            worksheet = self.sheet.worksheet(name_sheet)
+
+            for x in range(5):
+                columns_list.append(
+                    f"{dict_[x][f'range{x + 1}']['job_index'][:-1]}3:{dict_[x][f'range{x + 1}']['job_index'][:-1]}1000000")
+
+            worksheet.batch_clear(columns_list)
+
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка clear_data_range: "{es}"'
+
+            print(msg)
+
+            SendlerOneCreate('').save_text(msg)
+
+            return False
 
         return True
 
     def get_data_by_range(self, start_data_columns, over_data_columns, name_sheet):
+
         worksheet = self.sheet.worksheet(name_sheet)
 
         return worksheet.get_values(f"{start_data_columns}:{over_data_columns}")
@@ -174,129 +224,176 @@ class ConnectGoogleAlternative:
     def iter_cell_date_range(self, range, now_day, now_month):
         """Итерирую 1 диапазон с полученными значениями в виде дат и сравниваю с текущей датой"""
 
-        list_now_mouth_day = []
+        try:
 
-        for count, cell in enumerate(range):
+            list_now_mouth_day = []
 
-            date_cell = cell.value
+            for count, cell in enumerate(range):
 
-            if cell.value == '':
-                continue
+                date_cell = cell.value
 
-            try:
-                date_cell = datetime.strptime(date_cell, "%d.%m.%Y")
+                if cell.value == '':
+                    continue
 
-                day_cell = date_cell.day
+                try:
+                    date_cell = datetime.strptime(date_cell, "%d.%m.%Y")
 
-                month_cell = date_cell.month
-            except:
-                continue
+                    day_cell = date_cell.day
 
-            if now_month == month_cell:
+                    month_cell = date_cell.month
+                except:
+                    continue
 
-                if now_day > day_cell:
-                    # if now_day >= day_cell:
-                    list_now_mouth_day.append(count)
+                if now_month == month_cell:
+
+                    if now_day > day_cell:
+                        # if now_day >= day_cell:
+                        list_now_mouth_day.append(count)
+
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка iter_cell_date_range: "{es}"'
+
+            print(msg)
+
+            SendlerOneCreate('').save_text(msg)
+
+            return False
 
         return list_now_mouth_day
 
     def iter_range_find_date(self, range, now_day, now_month, start_index, start_index_col):
         """Итерируется диапазон с датами и ищется текущий месяц, если нет то стартовая позиция - первая"""
 
-        job_columns = {'job_index': start_index, 'job_index_col': start_index_col,
-                       'left_count': 0, 'right_count': 30, 'range': range}
+        try:
 
-        if now_day == 1:
-            return job_columns
+            job_columns = {'job_index': start_index, 'job_index_col': start_index_col,
+                           'left_count': 0, 'right_count': 30, 'range': range}
 
-        find_now_moth_cell = self.iter_cell_date_range(range, now_day, now_month)
+            if now_day == 1:
+                return job_columns
 
-        if find_now_moth_cell == [] or 30 in find_now_moth_cell:
-            return job_columns
+            find_now_moth_cell = self.iter_cell_date_range(range, now_day, now_month)
 
-        job_index = find_now_moth_cell.pop() + 1
+            if find_now_moth_cell == [] or 30 in find_now_moth_cell:
+                return job_columns
 
-        start_index = range[job_index].address
+            job_index = find_now_moth_cell.pop() + 1
 
-        start_index_col = range[job_index].col
+            start_index = range[job_index].address
 
-        job_columns = {'job_index': start_index, 'job_index_col': start_index_col,
-                       'left_count': job_index, 'right_count': len(range) - job_index - 1,
-                       'range': range}
+            start_index_col = range[job_index].col
+
+            job_columns = {'job_index': start_index, 'job_index_col': start_index_col,
+                           'left_count': job_index, 'right_count': len(range) - job_index - 1,
+                           'range': range}
+
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка iter_range_find_date: "{es}"'
+
+            print(msg)
+
+            SendlerOneCreate('').save_text(msg)
+
+            return False
 
         return job_columns
 
     def calculation_last_date(self, dict_range_row, name_sheet, now_day, now_month):
         """Получаю текущую дату и пробегаю по диапазонам, отправляя их в функцию итерации"""
 
-        worksheet = self.sheet.worksheet(name_sheet)
+        try:
 
-        good_list = []
+            worksheet = self.sheet.worksheet(name_sheet)
 
-        for count_range_date, range_columns in enumerate(dict_range_row.values()):
-            _dict_start_index = {}
+            good_list = []
 
-            _count = count_range_date + 1
+            for count_range_date, range_columns in enumerate(dict_range_row.values()):
+                _dict_start_index = {}
 
-            _range = self.get_range_(worksheet, range_columns[f"column{_count}_start"],
-                                     range_columns[f"column{_count}_end"])
+                _count = count_range_date + 1
 
-            time.sleep(self.micro_sleep)
+                _range = self.get_range_(worksheet, range_columns[f"column{_count}_start"],
+                                         range_columns[f"column{_count}_end"])
 
-            start_index_date = self.iter_range_find_date(_range, now_day, now_month,
-                                                         range_columns[f"column{_count}_start"],
-                                                         range_columns[f"column{_count}_start_col"])
+                time.sleep(self.micro_sleep)
 
-            time.sleep(self.micro_sleep)
+                start_index_date = self.iter_range_find_date(_range, now_day, now_month,
+                                                             range_columns[f"column{_count}_start"],
+                                                             range_columns[f"column{_count}_start_col"])
 
-            _dict_start_index[f'range{_count}'] = start_index_date
+                time.sleep(self.micro_sleep)
 
-            _dict_start_index[f"column{_count}_start"] = range_columns[f"column{_count}_start"]
+                _dict_start_index[f'range{_count}'] = start_index_date
 
-            _dict_start_index[f"column{_count}_start_col"] = range_columns[f"column{_count}_start_col"]
+                _dict_start_index[f"column{_count}_start"] = range_columns[f"column{_count}_start"]
 
-            _dict_start_index[f"column{_count}_end"] = range_columns[f"column{_count}_end"]
+                _dict_start_index[f"column{_count}_start_col"] = range_columns[f"column{_count}_start_col"]
 
-            _dict_start_index[f"column{_count}_end_col"] = range_columns[f"column{_count}_end_col"]
+                _dict_start_index[f"column{_count}_end"] = range_columns[f"column{_count}_end"]
 
-            good_list.append(_dict_start_index)
+                _dict_start_index[f"column{_count}_end_col"] = range_columns[f"column{_count}_end_col"]
+
+                good_list.append(_dict_start_index)
+
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка calculation_last_date: "{es}"'
+
+            print(msg)
+
+            SendlerOneCreate('').save_text(msg)
+
+            return False
 
         return good_list
 
     def _iter_dict_create_group(self, good_range_date, worksheet):
 
-        for count, _range in enumerate(good_range_date):
+        try:
 
-            _count = count + 1
+            for count, _range in enumerate(good_range_date):
 
-            seven_target = 0
+                _count = count + 1
 
-            left_count = _range[f"range{_count}"]['left_count']
+                seven_target = 0
 
-            right_count = _range[f"range{_count}"]['right_count']
+                left_count = _range[f"range{_count}"]['left_count']
 
-            if left_count >= self.count_group:
+                right_count = _range[f"range{_count}"]['right_count']
 
-                difference = left_count - self.count_group
+                if left_count >= self.count_group:
 
-                start_group = _range[f'column{_count}_start_col'] - 1
+                    difference = left_count - self.count_group
 
-                columns_difference = _range[f"range{_count}"]['range'][difference].col
+                    start_group = _range[f'column{_count}_start_col'] - 1
 
-                seven_target = 30 - difference - self.count_group
+                    columns_difference = _range[f"range{_count}"]['range'][difference].col
 
-                worksheet.add_dimension_group_columns(start_group, columns_difference)
+                    seven_target = 30 - difference - self.count_group
 
-                time.sleep(self.micro_sleep)
-
-                worksheet._hide_dimension(start_group, columns_difference, 'COLUMNS')
-
-                if seven_target > 1:
-                    """Если остаются с права колонки то их группируем"""
+                    worksheet.add_dimension_group_columns(start_group, columns_difference)
 
                     time.sleep(self.micro_sleep)
 
-                    start_point = _range[f'column{_count}_end_col'] - seven_target
+                    worksheet._hide_dimension(start_group, columns_difference, 'COLUMNS')
+
+                    if seven_target > 1:
+                        """Если остаются с права колонки то их группируем"""
+
+                        time.sleep(self.micro_sleep)
+
+                        start_point = _range[f'column{_count}_end_col'] - seven_target
+
+                        end_point = _range[f'column{_count}_end_col'] - 1
+
+                        worksheet.add_dimension_group_columns(start_point, end_point)
+
+                        time.sleep(self.micro_sleep)
+
+                        worksheet._hide_dimension(start_point, end_point, 'COLUMNS')
+
+                if right_count > 1 and seven_target == 0:
+
+                    start_point = _range[f'column{_count}_start_col'] + (self.count_group) - 1
 
                     end_point = _range[f'column{_count}_end_col'] - 1
 
@@ -306,122 +403,151 @@ class ConnectGoogleAlternative:
 
                     worksheet._hide_dimension(start_point, end_point, 'COLUMNS')
 
-            if right_count > 1 and seven_target == 0:
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка _iter_dict_create_group: "{es}"'
 
-                start_point = _range[f'column{_count}_start_col'] + (self.count_group) - 1
+            print(msg)
 
-                end_point = _range[f'column{_count}_end_col'] - 1
+            SendlerOneCreate('').save_text(msg)
 
-                worksheet.add_dimension_group_columns(start_point, end_point)
-
-                time.sleep(self.micro_sleep)
-
-                worksheet._hide_dimension(start_point, end_point, 'COLUMNS')
+            return False
 
         return True
 
     def clear_hide_group_and_create_new_group(self, good_range_date, name_sheet):
+        try:
 
-        worksheet = self.sheet.worksheet(name_sheet)
+            worksheet = self.sheet.worksheet(name_sheet)
 
-        worksheet.delete_dimension_group_columns(50, 1000)
+            worksheet.delete_dimension_group_columns(50, 1000)
 
-        worksheet.unhide_columns(50, 1000)
+            worksheet.unhide_columns(50, 1000)
 
-        time.sleep(self.micro_sleep)
+            time.sleep(self.micro_sleep)
 
-        res_group = self._iter_dict_create_group(good_range_date, worksheet)
+            res_group = self._iter_dict_create_group(good_range_date, worksheet)
+
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка clear_hide_group_and_create_new_group: "{es}"'
+
+            print(msg)
+
+            SendlerOneCreate('').save_text(msg)
+
+            return False
 
         return True
 
     def write_data_from_exel_file(self, good_range_date, name_sheet, count_google_row,
                                   position, rez_ocenka, popular_request, trade_product, popular_total):
 
-        if position == '':
-            print(f'Пустое значение словить')
+        try:
 
-        worksheet = self.sheet.worksheet(name_sheet)
+            if position == '':
+                print(f'Пустое значение словить')
 
-        position_columns = good_range_date[0]['range1']['job_index_col']
+            worksheet = self.sheet.worksheet(name_sheet)
 
-        job_row = 3 + count_google_row
+            position_columns = good_range_date[0]['range1']['job_index_col']
 
-        worksheet.update_cell(job_row, position_columns, position)
+            job_row = 3 + count_google_row
 
-        time.sleep(1)
+            worksheet.update_cell(job_row, position_columns, position)
 
-        rez_ocenka_columns = good_range_date[1]['range2']['job_index_col']
+            time.sleep(1)
 
-        job_row = 3 + count_google_row
+            rez_ocenka_columns = good_range_date[1]['range2']['job_index_col']
 
-        worksheet.update_cell(job_row, rez_ocenka_columns, rez_ocenka)
+            job_row = 3 + count_google_row
 
-        time.sleep(1)
+            worksheet.update_cell(job_row, rez_ocenka_columns, rez_ocenka)
 
-        popular_request_columns = good_range_date[2]['range3']['job_index_col']
+            time.sleep(1)
 
-        job_row = 3 + count_google_row
+            popular_request_columns = good_range_date[2]['range3']['job_index_col']
 
-        worksheet.update_cell(job_row, popular_request_columns, popular_request)
+            job_row = 3 + count_google_row
 
-        time.sleep(1)
+            worksheet.update_cell(job_row, popular_request_columns, popular_request)
 
-        trade_product_columns = good_range_date[3]['range4']['job_index_col']
+            time.sleep(1)
 
-        job_row = 3 + count_google_row
+            trade_product_columns = good_range_date[3]['range4']['job_index_col']
 
-        worksheet.update_cell(job_row, trade_product_columns, trade_product)
+            job_row = 3 + count_google_row
 
-        time.sleep(1)
+            worksheet.update_cell(job_row, trade_product_columns, trade_product)
 
-        popular_total_columns = good_range_date[4]['range5']['job_index_col']
+            time.sleep(1)
 
-        job_row = 3 + count_google_row
+            popular_total_columns = good_range_date[4]['range5']['job_index_col']
 
-        worksheet.update_cell(job_row, popular_total_columns, popular_total)
+            job_row = 3 + count_google_row
+
+            worksheet.update_cell(job_row, popular_total_columns, popular_total)
+
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка write_data_from_exel_file: "{es}"'
+
+            print(msg)
+
+            SendlerOneCreate('').save_text(msg)
+
+            return False
 
         return True
 
     def write_position_no_document(self, good_range_date, name_sheet, count_google_row, position):
 
-        worksheet = self.sheet.worksheet(name_sheet)
+        try:
 
-        if not position or position == '-':
-            position = 0
+            worksheet = self.sheet.worksheet(name_sheet)
 
-            _count = 0
+            if not position or position == '-':
+                position = 0
 
-            test = f"{good_range_date[_count][f'range{_count + 1}']['job_index'][:-1]}{3 + count_google_row}"
+                _count = 0
 
-            worksheet.format(f'{test}:{test}', {
-                "backgroundColor": {
-                    "red": 1,
-                    "green": 0.0,
-                    "blue": 0.0
-                },
-            })
+                test = f"{good_range_date[_count][f'range{_count + 1}']['job_index'][:-1]}{3 + count_google_row}"
 
-            time.sleep(1)
+                worksheet.format(f'{test}:{test}', {
+                    "backgroundColor": {
+                        "red": 1,
+                        "green": 0.0,
+                        "blue": 0.0
+                    },
+                })
 
-        position_columns = good_range_date[0]['range1']['job_index_col']
+                time.sleep(1)
 
-        job_row = 3 + count_google_row
+            position_columns = good_range_date[0]['range1']['job_index_col']
 
-        worksheet.update_cell(job_row, position_columns, position)
+            job_row = 3 + count_google_row
 
-        for x in range(4):
-            _count = x + 1
+            worksheet.update_cell(job_row, position_columns, position)
 
-            test = f"{good_range_date[_count][f'range{_count + 1}']['job_index'][:-1]}{3 + count_google_row}"
+            for x in range(4):
+                _count = x + 1
 
-            worksheet.format(f'{test}:{test}', {
-                "backgroundColor": {
-                    "red": 1,
-                    "green": 0.0,
-                    "blue": 0.0
-                },
-            })
+                test = f"{good_range_date[_count][f'range{_count + 1}']['job_index'][:-1]}{3 + count_google_row}"
 
-            time.sleep(1)
+                worksheet.format(f'{test}:{test}', {
+                    "backgroundColor": {
+                        "red": 1,
+                        "green": 0.0,
+                        "blue": 0.0
+                    },
+                })
+
+                time.sleep(1)
+
+        except Exception as es:
+            msg = f'{NAME_SERVER} Ошибка write_position_no_document: "{es}"'
+
+            print(msg)
+
+            SendlerOneCreate('').save_text(msg)
+
+            return False
 
         return True
